@@ -1,0 +1,92 @@
+name: veradocs-dev
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: veradocs-pgvector-dev
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-veradocs_db}
+      POSTGRES_USER: ${POSTGRES_USER:-veradocs_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-veradocs_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      # Persistent volume for database data
+      - pgvector_data:/var/lib/postgresql/data
+      # Initialization SQL script ensuring vector and uuid extensions exist
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-veradocs_user} -d ${POSTGRES_DB:-veradocs_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - veradocs-net
+
+  backend:
+    container_name: veradocs-backend-dev
+    restart: unless-stopped
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.Dev
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      # Bind mount backend code for real-time live reloading
+      - ./backend:/workspace
+    environment:
+      POSTGRES_SERVER: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-veradocs_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-veradocs_password}
+      POSTGRES_DB: ${POSTGRES_DB:-veradocs_db}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-veradocs_user}:${POSTGRES_PASSWORD:-veradocs_password}@postgres:5432/${POSTGRES_DB:-veradocs_db}
+      SYNC_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-veradocs_user}:${POSTGRES_PASSWORD:-veradocs_password}@postgres:5432/${POSTGRES_DB:-veradocs_db}
+      EMBEDDING_DIMENSION: ${EMBEDDING_DIMENSION:-1536}
+      PYTHONPATH: /workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - veradocs-net
+
+  client:
+    container_name: veradocs-client-dev
+    restart: unless-stopped
+    build:
+      context: ./client
+      dockerfile: Dockerfile.Dev
+    ports:
+      - "${CLIENT_PORT:-3000}:3000"
+    volumes:
+      # Bind mount client code for live hot reloading
+      - ./client:/app
+      # Preserve container node_modules & Next.js cache from host overrides
+      - /app/node_modules
+      - /app/.next
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      WATCHPACK_POLLING: "true"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - veradocs-net
+
+# =============================================================================
+# Networks & Persistent Volumes
+# =============================================================================
+networks:
+  veradocs-net:
+    driver: bridge
+    name: veradocs-dev-network
+
+volumes:
+  pgvector_data:
+    driver: local
+    name: veradocs_pgvector_data

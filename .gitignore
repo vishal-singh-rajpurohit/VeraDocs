@@ -1,0 +1,147 @@
+# =============================================================================
+# VeraDocs - Root .gitignore
+# Multi-Tenant Document Intelligence Platform (Next.js + FastAPI + pgvector)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Environment & Sensitive Credentials
+# -----------------------------------------------------------------------------
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.cert
+*.crt
+# Do not ignore template env files
+!.env.example
+!client/.env.example
+!backend/.env.example
+
+# -----------------------------------------------------------------------------
+# Node.js & Next.js (Frontend)
+# -----------------------------------------------------------------------------
+node_modules/
+client/node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+
+# Next.js build output
+.next/
+client/.next/
+**/.next/
+out/
+client/out/
+build/
+client/build/
+dist/
+client/dist/
+
+# TypeScript cache
+*.tsbuildinfo
+next-env.d.ts
+
+# -----------------------------------------------------------------------------
+# Python, FastAPI & Virtual Environments (Backend)
+# -----------------------------------------------------------------------------
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments
+.venv/
+backend/.venv/
+**/venv/
+**/env/
+ENV/
+env.bak/
+venv.bak/
+
+# Packaging & Distribution
+*.egg
+*.eggs/
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# Testing & Static Analysis
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# -----------------------------------------------------------------------------
+# Database, Volumes & Local Storage
+# -----------------------------------------------------------------------------
+pgdata/
+pgvector_data/
+*.sqlite
+*.sqlite3
+*.db
+docker/postgres/data/
+
+# Uploaded documents & local extraction staging
+uploads/
+backend/uploads/
+temp/
+tmp/
+*.tmp
+
+# -----------------------------------------------------------------------------
+# Logs & Process Output
+# -----------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# -----------------------------------------------------------------------------
+# Operating System & Filesystem Artifacts
+# -----------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# -----------------------------------------------------------------------------
+# IDEs & Editor Configurations
+# -----------------------------------------------------------------------------
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
